@@ -10,7 +10,7 @@ const donneesSimulees = [
     presence_court: true,
     frames_detectées: 187,
     distance_totale_pixels: 6830,
-    sets_gagnés: 1,
+    sets: [6, 4, 2],
   },
   {
     joueur: 2,
@@ -19,17 +19,14 @@ const donneesSimulees = [
     presence_court: true,
     frames_detectées: 190,
     distance_totale_pixels: 8450,
-    sets_gagnés: 1,
+    sets: [4, 6, 0],
   },
 ];
-
-const scoreGlobalSimulé = "6-4 / 4-6 / 2-0";
 
 export default function TennisDashboard() {
   const [stats, setStats] = useState(null);
   const [heureMaj, setHeureMaj] = useState("");
   const [connexionErreur, setConnexionErreur] = useState(false);
-  const [scoreMatch, setScoreMatch] = useState(scoreGlobalSimulé);
 
   const fetchStats = async () => {
     try {
@@ -45,7 +42,6 @@ export default function TennisDashboard() {
       console.warn("Connexion échouée, données simulées utilisées.");
       setStats(donneesSimulees);
       setConnexionErreur(true);
-      setScoreMatch(scoreGlobalSimulé);
     }
 
     const now = new Date();
@@ -85,53 +81,61 @@ export default function TennisDashboard() {
         <p className="text-green-600">🟢 Statistiques reçues</p>
       )}
 
+      {/* Tableau de score par set */}
+      {stats && (
+        <div className="overflow-x-auto mb-10 mt-8">
+          <table className="table-auto mx-auto text-sm border-collapse shadow-md bg-white">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border px-4 py-2 text-left">Joueur</th>
+                {stats[0].sets.map((_, index) => (
+                  <th key={index} className="border px-4 py-2">
+                    Set {index + 1}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {stats.map((stat) => (
+                <tr key={stat.joueur}>
+                  <td className="border px-4 py-2 font-medium">{stat.nom}</td>
+                  {stat.sets.map((score, idx) => (
+                    <td key={idx} className="border px-4 py-2 text-center">
+                      {score}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Cartes Joueurs */}
       {stats ? (
-        <div className="grid md:grid-cols-3 gap-6 mt-6 items-center">
-          {/* Joueur 1 */}
-          <div className="border rounded-xl p-4 text-left shadow-md bg-white flex flex-col items-center">
-            <img
-              src={stats[0].photo}
-              alt={`Photo de ${stats[0].nom}`}
-              className="w-24 h-24 rounded-full mb-2 object-cover shadow"
-            />
-            <h3 className="text-lg font-semibold mb-1">{stats[0].nom}</h3>
-            <div className="w-full mt-2 space-y-1 text-sm text-gray-700">
-              <p>✅ Présence détectée : {stats[0].presence_court ? "Oui" : "Non"}</p>
-              <p>🖼️ Frames détectées : {stats[0].frames_detectées}</p>
-              <p>
-                🏃‍♂️ Distance parcourue (px) :{" "}
-                <strong>{stats[0].distance_totale_pixels.toLocaleString()}</strong>
-              </p>
-              <p>🏆 Sets gagnés : {stats[0].sets_gagnés}</p>
-            </div>
-          </div>
+        <div className="grid md:grid-cols-2 gap-6 mt-6">
+          {stats.map((stat) => (
+            <div
+              key={stat.joueur}
+              className="border rounded-xl p-4 text-left shadow-md bg-white flex flex-col items-center"
+            >
+              <img
+                src={stat.photo}
+                alt={`Photo de ${stat.nom}`}
+                className="w-24 h-24 rounded-full mb-2 object-cover shadow"
+              />
+              <h3 className="text-lg font-semibold mb-1">{stat.nom}</h3>
 
-          {/* Score au centre */}
-          <div className="text-center">
-            <p className="text-xl font-bold mb-2">🎯 Score du match</p>
-            <p className="text-2xl text-blue-700 font-semibold bg-gray-100 rounded px-4 py-2 inline-block shadow">
-              {scoreMatch}
-            </p>
-          </div>
-
-          {/* Joueur 2 */}
-          <div className="border rounded-xl p-4 text-left shadow-md bg-white flex flex-col items-center">
-            <img
-              src={stats[1].photo}
-              alt={`Photo de ${stats[1].nom}`}
-              className="w-24 h-24 rounded-full mb-2 object-cover shadow"
-            />
-            <h3 className="text-lg font-semibold mb-1">{stats[1].nom}</h3>
-            <div className="w-full mt-2 space-y-1 text-sm text-gray-700">
-              <p>✅ Présence détectée : {stats[1].presence_court ? "Oui" : "Non"}</p>
-              <p>🖼️ Frames détectées : {stats[1].frames_detectées}</p>
-              <p>
-                🏃‍♂️ Distance parcourue (px) :{" "}
-                <strong>{stats[1].distance_totale_pixels.toLocaleString()}</strong>
-              </p>
-              <p>🏆 Sets gagnés : {stats[1].sets_gagnés}</p>
+              <div className="w-full mt-2 space-y-1 text-sm text-gray-700">
+                <p>✅ Présence détectée : {stat.presence_court ? "Oui" : "Non"}</p>
+                <p>🖼️ Frames détectées : {stat.frames_detectées}</p>
+                <p>
+                  🏃‍♂️ Distance parcourue (px) :{" "}
+                  <strong>{stat.distance_totale_pixels.toLocaleString()}</strong>
+                </p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       ) : (
         <p>Chargement des statistiques...</p>
