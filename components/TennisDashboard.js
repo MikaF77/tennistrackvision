@@ -5,12 +5,16 @@ import { useEffect, useState } from "react";
 const donneesSimulees = [
   {
     joueur: 1,
+    nom: "Lucas Martin",
+    photo: "https://randomuser.me/api/portraits/men/11.jpg",
     presence_court: true,
     frames_detectées: 187,
     distance_totale_pixels: 6830,
   },
   {
     joueur: 2,
+    nom: "Antoine Leroy",
+    photo: "https://randomuser.me/api/portraits/men/15.jpg",
     presence_court: true,
     frames_detectées: 190,
     distance_totale_pixels: 8450,
@@ -40,10 +44,12 @@ export default function TennisDashboard() {
       }
 
       const now = new Date();
-      const heures = now.getHours().toString().padStart(2, "0");
-      const minutes = now.getMinutes().toString().padStart(2, "0");
-      const secondes = now.getSeconds().toString().padStart(2, "0");
-      setHeureMaj(`${heures}:${minutes}:${secondes}`);
+      setHeureMaj(
+        `${now.getHours().toString().padStart(2, "0")}:${now
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`
+      );
     };
 
     fetchStats();
@@ -57,9 +63,7 @@ export default function TennisDashboard() {
         ⚠️ Données simulées – affichage de test uniquement
       </div>
 
-      <h2 className="text-3xl font-bold mb-2">
-        🎾 Statistiques TennisTrackVision
-      </h2>
+      <h2 className="text-3xl font-bold mb-2">🎾 Statistiques TennisTrackVision</h2>
       <p className="text-sm mb-4">Dernière mise à jour : {heureMaj}</p>
       {connexionErreur ? (
         <p className="text-red-500">🔴 Aucune donnée reçue (affichage simulé)</p>
@@ -68,19 +72,27 @@ export default function TennisDashboard() {
       )}
 
       {stats ? (
-        <div className="grid md:grid-cols-2 gap-4 mt-6">
+        <div className="grid md:grid-cols-2 gap-6 mt-6">
           {stats.map((stat) => (
             <div
               key={stat.joueur}
-              className="border rounded-xl p-4 text-left shadow-md bg-white"
+              className="border rounded-xl p-4 text-left shadow-md bg-white flex flex-col items-center"
             >
-              <h3 className="text-xl font-bold mb-2">🥎 Joueur {stat.joueur}</h3>
-              <p>✅ Présence détectée : {stat.presence_court ? "Oui" : "Non"}</p>
-              <p>🖼️ Frames détectées : {stat.frames_detectées}</p>
-              <p>
-                🏃‍♂️ Distance totale parcourue (px) :{" "}
-                <strong>{stat.distance_totale_pixels.toLocaleString()}</strong>
-              </p>
+              <img
+                src={stat.photo}
+                alt={`Photo de ${stat.nom}`}
+                className="w-24 h-24 rounded-full mb-2 object-cover shadow"
+              />
+              <h3 className="text-lg font-semibold mb-1">{stat.nom}</h3>
+
+              <div className="w-full mt-2 space-y-1 text-sm text-gray-700">
+                <p>✅ Présence détectée : {stat.presence_court ? "Oui" : "Non"}</p>
+                <p>🖼️ Frames détectées : {stat.frames_detectées}</p>
+                <p>
+                  🏃‍♂️ Distance parcourue (px) :{" "}
+                  <strong>{stat.distance_totale_pixels.toLocaleString()}</strong>
+                </p>
+              </div>
             </div>
           ))}
         </div>
