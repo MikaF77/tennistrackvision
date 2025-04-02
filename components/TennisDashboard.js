@@ -23,10 +23,18 @@ const donneesSimulees = [
   },
 ];
 
+function formatTempsDepuisFrames(nbFrames) {
+  const totalSecondes = Math.floor(nbFrames / 30); // 30 fps
+  const minutes = Math.floor(totalSecondes / 60);
+  const secondes = totalSecondes % 60;
+  return `${minutes} min ${secondes.toString().padStart(2, "0")} sec`;
+}
+
 export default function TennisDashboard() {
   const [stats, setStats] = useState(null);
   const [heureMaj, setHeureMaj] = useState("");
   const [connexionErreur, setConnexionErreur] = useState(false);
+  const [tempsJeu, setTempsJeu] = useState("—");
 
   const fetchStats = async () => {
     try {
@@ -59,6 +67,14 @@ export default function TennisDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (stats) {
+      const maxFrames = Math.max(...stats.map((s) => s.frames_detectées));
+      const duree = formatTempsDepuisFrames(maxFrames);
+      setTempsJeu(duree);
+    }
+  }, [stats]);
+
   return (
     <div className="p-6 text-center">
       <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md shadow mb-4 text-sm">
@@ -81,9 +97,16 @@ export default function TennisDashboard() {
         <p className="text-green-600">🟢 Statistiques reçues</p>
       )}
 
-      {/* Tableau de score par set */}
+      {/* Temps de jeu */}
+      <div className="text-center my-6">
+        <p className="text-lg text-gray-700 font-semibold">
+          ⏱️ Temps total de jeu estimé : <span className="text-blue-600">{tempsJeu}</span>
+        </p>
+      </div>
+
+      {/* Tableau des scores par set */}
       {stats && (
-        <div className="overflow-x-auto mb-10 mt-8">
+        <div className="overflow-x-auto mb-10 mt-6">
           <table className="table-auto mx-auto text-sm border-collapse shadow-md bg-white">
             <thead className="bg-gray-100">
               <tr>
@@ -111,7 +134,7 @@ export default function TennisDashboard() {
         </div>
       )}
 
-      {/* Cartes Joueurs */}
+      {/* Fiches joueurs */}
       {stats ? (
         <div className="grid md:grid-cols-2 gap-6 mt-6">
           {stats.map((stat) => (
