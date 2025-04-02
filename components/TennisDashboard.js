@@ -1,136 +1,91 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  LabelList,
-} from "recharts";
+
+const donneesSimulees = [
+  {
+    joueur: 1,
+    presence_court: true,
+    frames_detectées: 187,
+    distance_totale_pixels: 6830,
+  },
+  {
+    joueur: 2,
+    presence_court: true,
+    frames_detectées: 190,
+    distance_totale_pixels: 8450,
+  },
+];
 
 export default function TennisDashboard() {
-  const [stats, setStats] = useState([]);
-  const [lastUpdate, setLastUpdate] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [heureMaj, setHeureMaj] = useState("");
+  const [connexionErreur, setConnexionErreur] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/stats");
-        const data = await res.json();
+        const response = await fetch("http://127.0.0.1:5000/stats");
+        if (!response.ok) throw new Error("Erreur de réponse");
+
+        const data = await response.json();
+        if (data.length === 0) throw new Error("Aucune donnée reçue");
+
         setStats(data);
-        setLastUpdate(new Date());
+        setConnexionErreur(false);
       } catch (error) {
-        console.error("Erreur lors de la récupération des stats :", error);
+        console.warn("Connexion au backend échouée, données simulées utilisées.");
+        setStats(donneesSimulees);
+        setConnexionErreur(true);
       }
+
+      const now = new Date();
+      const heures = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const secondes = now.getSeconds().toString().padStart(2, "0");
+      setHeureMaj(`${heures}:${minutes}:${secondes}`);
     };
 
     fetchStats();
-
-    const interval = setInterval(() => {
-      fetchStats();
-    }, 3000);
-
+    const interval = setInterval(fetchStats, 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2 text-center">
-        🎾 Statistiques TennisTrackVision
-      </h1>
-
-      {lastUpdate && (
-        <p className="text-center text-sm text-gray-500">
-          Dernière mise à jour : {lastUpdate.toLocaleTimeString("fr-FR")}
-        </p>
-      )}
-
-      <div className="text-center mb-4">
-        <span
-          className={`inline-block w-3 h-3 rounded-full mr-2 ${
-            stats.length > 0 ? "bg-green-500" : "bg-red-500"
-          }`}
-        ></span>
-        <span className="text-sm text-gray-600">
-          {stats.length > 0 ? "Statistiques reçues" : "Aucune donnée reçue"}
-        </span>
+    <div className="p-6 text-center">
+      <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md shadow mb-4 text-sm">
+        ⚠️ Données simulées – affichage de test uniquement
       </div>
 
-      {stats.length === 0 ? (
-        <p className="text-center">Chargement des statistiques...</p>
+      <h2 className="text-3xl font-bold mb-2">
+        🎾 Statistiques TennisTrackVision
+      </h2>
+      <p className="text-sm mb-4">Dernière mise à jour : {heureMaj}</p>
+      {connexionErreur ? (
+        <p className="text-red-500">🔴 Aucune donnée reçue (affichage simulé)</p>
       ) : (
-        <>
-          <div className="space-y-6">
-            {stats.map((player) => (
-              <div
-                key={player.joueur}
-                className="border rounded-xl p-5 shadow bg-white"
-              >
-                <h2 className="text-xl font-semibold mb-2">
-                  🎽 Joueur {player.joueur}
-                </h2>
-                <ul className="text-gray-700 space-y-1">
-                  <li>
-                    ✅ Présence détectée :{" "}
-                    <span className="font-semibold">
-                      {player.presence_court ? "Oui" : "Non"}
-                    </span>
-                  </li>
-                  <li>
-                    🖼️ Frames détectées :{" "}
-                    <span className="font-semibold">
-                      {player.frames_detectees}
-                    </span>
-                  </li>
-                  <li>
-                    🏃‍♂️ Distance totale parcourue (px) :{" "}
-                    <span className="font-semibold">
-                      {player.distance_totale_pixels.toLocaleString("fr-FR")}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            ))}
-          </div>
+        <p className="text-green-600">🟢 Statistiques reçues</p>
+      )}
 
-          {stats.length >= 2 && (
-            <div className="mt-10">
-              <h3 className="text-xl font-bold mb-4 text-center">
-                🏃‍♂️ Distance parcourue comparée
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart
-                  layout="vertical"
-                  data={stats.map((p) => ({
-                    name: `Joueur ${p.joueur}`,
-                    distance: p.distance_totale_pixels,
-                  }))}
-                  margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
-                >
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" />
-                  <Tooltip
-                    formatter={(value) =>
-                      `${value.toLocaleString("fr-FR")} px`
-                    }
-                  />
-                  <Bar dataKey="distance" fill="#3182ce">
-                    <LabelList
-                      dataKey="distance"
-                      position="right"
-                      formatter={(value) =>
-                        `${value.toLocaleString("fr-FR")} px`
-                      }
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+      {stats ? (
+        <div className="grid md:grid-cols-2 gap-4 mt-6">
+          {stats.map((stat) => (
+            <div
+              key={stat.joueur}
+              className="border rounded-xl p-4 text-left shadow-md bg-white"
+            >
+              <h3 className="text-xl font-bold mb-2">🥎 Joueur {stat.joueur}</h3>
+              <p>✅ Présence détectée : {stat.presence_court ? "Oui" : "Non"}</p>
+              <p>🖼️ Frames détectées : {stat.frames_detectées}</p>
+              <p>
+                🏃‍♂️ Distance totale parcourue (px) :{" "}
+                <strong>{stat.distance_totale_pixels.toLocaleString()}</strong>
+              </p>
             </div>
-          )}
-        </>
+          ))}
+        </div>
+      ) : (
+        <p>Chargement des statistiques...</p>
       )}
     </div>
   );
