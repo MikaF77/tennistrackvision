@@ -1,12 +1,15 @@
-import { createClient } from '@/utils/supabase/server'
+import TennisDashboard from "@/components/TennisDashboard";
+import UserMenu from "@/components/UserMenu";
 
-export default async function Home() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+export default function HomePage() {
   return (
-    <main>
-      {user ? <p>Bienvenue {user.email}</p> : <p>Non connecté</p>}
+    <main className="min-h-screen p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Statistiques du Match 🎾</h1>
+        <UserMenu /> {/* ✅ Menu utilisateur affiché en haut à droite */}
+      </div>
+
+      <TennisDashboard />
     </main>
-  )
+  );
 }

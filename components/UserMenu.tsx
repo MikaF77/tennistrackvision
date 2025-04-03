@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export default function UserMenu() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -11,46 +12,43 @@ export default function UserMenu() {
   const supabase = createClient();
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data?.user) {
-        setUserEmail(data.user.email);
-      }
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserEmail(user?.email || null);
     };
-    getUser();
-  }, [supabase]);
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push("/login");
   };
 
+  const handleChangePassword = async () => {
+    router.push("/change-password");
+  };
+
+  if (!userEmail) return null;
+
   return (
-    <div className="relative text-right ml-auto mr-4 mt-2">
-      {userEmail && (
-        <div>
+    <div className="relative">
+      <Button onClick={() => setMenuOpen(!menuOpen)} variant="outline">
+        {userEmail}
+      </Button>
+      {menuOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded border z-10">
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-full shadow-sm"
+            onClick={handleChangePassword}
+            className="w-full px-4 py-2 text-left hover:bg-gray-100"
           >
-            👤 {userEmail}
+            🔐 Modifier le mot de passe
           </button>
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded shadow-lg z-50">
-              <button
-                onClick={() => router.push('/change-password')}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                🔒 Modifier mon mot de passe
-              </button>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-              >
-                🚪 Se déconnecter
-              </button>
-            </div>
-          )}
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+          >
+            🚪 Déconnexion
+          </button>
         </div>
       )}
     </div>
