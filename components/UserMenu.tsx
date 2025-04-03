@@ -32,7 +32,9 @@ export default function UserMenu() {
 
   return (
     <div className="relative">
-      <Button onClick={() => setMenuOpen(!menuOpen)} variant="outline">
+      <Button onClick={() => setMenuOpen(!menuOpen)} 
+	  className="border border-gray-300 text-gray-700 hover:bg-gray-100"
+	 >
         {userEmail}
       </Button>
       {menuOpen && (
