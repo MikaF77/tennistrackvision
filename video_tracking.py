@@ -11,13 +11,29 @@ model = YOLO("yolov8n.pt")
 pixels_par_metre = 126.9  # mesuré à partir de la largeur réelle du court (8,23 m)
 
 # === CHARGEMENT DE LA VIDÉO ===
-cap = cv2.VideoCapture(video_path)
+import cv2
+
+video_url = "https://tennistrackvision.b-cdn.net/tennis.mp4"
+cap = cv2.VideoCapture(video_url)
 
 if not cap.isOpened():
-    print("❌ Impossible d'ouvrir la vidéo :", video_path)
+    print("❌ Impossible d’ouvrir la vidéo depuis l’URL")
     exit()
-else:
-    print("✅ Vidéo chargée avec succès :", video_path)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("🔚 Fin de la vidéo ou lecture impossible.")
+        break
+
+    # Traitement YOLO ici
+    cv2.imshow("Stream en ligne", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
 
 player_positions = []
 frame_count = 0
