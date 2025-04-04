@@ -1,9 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
 
 export const createClient = () => {
-  const cookieStore = cookies()
-  const headerStore = headers()
+  const cookieStore = cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,10 +10,9 @@ export const createClient = () => {
     {
       cookies: {
         get(name) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
       },
-      headers: () => headerStore,
     }
-  )
-}
+  );
+};
