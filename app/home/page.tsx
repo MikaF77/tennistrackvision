@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import Link from 'next/link';
-import LogoutButton from "./components/LogoutButton";
 
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
@@ -25,6 +24,11 @@ export default async function HomePage() {
           <li><Link href="/mes-matchs" className="hover:underline">Mes matchs</Link></li>
           <li><Link href="/statistiques" className="hover:underline">Statistiques</Link></li>
           <li><Link href="/live" className="hover:underline">Live</Link></li>
+          {currentUser && (
+  <div className="text-center">
+    <LogoutButton />
+  </div>
+)}
         </ul>
       </nav>
 

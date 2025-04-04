@@ -1,17 +1,21 @@
+// utils/supabase/matchs.ts
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 export async function getUserMatchs() {
-  const supabase = createClient();
-  const { data, error } = await supabase
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data: matchs, error } = await supabase
     .from("matchs")
     .select("*")
-    .or("joueur_1.eq.${user_id},joueur_2.eq.${user_id}");
+    .eq("user_id", user.id)
+    .order("date", { ascending: false });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw error;
 
-  return data;
+  return matchs;
 }
