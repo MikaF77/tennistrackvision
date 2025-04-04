@@ -1,65 +1,48 @@
-'use client';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
+import Link from 'next/link';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+export default async function HomePage() {
+  const supabase = createSupabaseServerClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
 
-export default function LoginPage() {
-  const router = useRouter();
-  const supabase = createClient();
+  // Récupère l'utilisateur connecté
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  // Vérifie si l'utilisateur est déjà connecté
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        router.push('/stats'); // Redirige s’il est déjà connecté
-      }
-    };
-    checkUser();
-  }, []);
-
-  const handleLogin = async () => {
-    setError('');
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push('/stats'); // Redirige vers les stats après connexion
-    }
-  };
+  // Récupère le nombre de matchs
+  const { count } = await supabase
+    .from('matchs')
+    .select('*', { count: 'exact', head: true });
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6">
-      <h1 className="text-2xl font-bold mb-4">Connexion 🎾</h1>
-      <div className="w-full max-w-sm space-y-4">
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button className="w-full" onClick={handleLogin}>
-          Se connecter
-        </Button>
+    <main className="min-h-screen p-6 bg-gray-100">
+      {/* Barre de navigation */}
+      <nav className="flex justify-between items-center mb-8">
+        <h1 className="text-xl font-bold">🎾 TennisTrackVision</h1>
+        <ul className="flex space-x-4">
+          <li><Link href="/" className="hover:underline">Accueil</Link></li>
+          <li><Link href="/mes-matchs" className="hover:underline">Mes matchs</Link></li>
+          <li><Link href="/statistiques" className="hover:underline">Statistiques</Link></li>
+          <li><Link href="/live" className="hover:underline">Live</Link></li>
+        </ul>
+      </nav>
+
+      {/* Fiche joueur */}
+      <div className="bg-white shadow-md p-6 rounded-md mb-6 max-w-md mx-auto">
+        <h2 className="text-lg font-semibold mb-2">👤 Joueur connecté</h2>
+        <p><strong>Email :</strong> {currentUser?.email}</p>
+        <p><strong>Nom :</strong> {currentUser?.user_metadata?.last_name || '—'}</p>
+        <p><strong>Prénom :</strong> {currentUser?.user_metadata?.first_name || '—'}</p>
       </div>
-    </div>
+
+      {/* Statistiques */}
+      <div className="bg-white shadow-md p-6 rounded-md max-w-md mx-auto">
+        <h2 className="text-lg font-semibold mb-2">📊 Statistiques générales</h2>
+        <p>Nombre total de matchs dans la base : <strong>{count ?? 0}</strong></p>
+      </div>
+    </main>
   );
 }

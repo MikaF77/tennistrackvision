@@ -1,7 +1,9 @@
+// utils/supabase/server.ts
+
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
-export const createClient = () => {
+export const createSupabaseServerClient = () => {
   const cookieStore = cookies();
 
   return createServerClient(
