@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
