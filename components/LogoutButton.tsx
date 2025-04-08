@@ -1,17 +1,21 @@
-// app/components/LogoutButton.tsx
-"use client";
+'use client';
 
-import { signOut } from "@/utils/supabase/logout";
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 export default function LogoutButton() {
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
   return (
-    <form action={signOut}>
-      <button
-        type="submit"
-        className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-      >
-        Se déconnecter
-      </button>
-    </form>
+    <Button variant="outline" onClick={handleLogout}>
+      Se déconnecter
+    </Button>
   );
 }

@@ -6,8 +6,13 @@ export default async function HomePage() {
 
   // Récupère l'utilisateur connecté
   const {
-    data: { user: currentUser },
+    data: { user },
   } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+  
 
   // Récupère le nombre de matchs
   const { count } = await supabase
