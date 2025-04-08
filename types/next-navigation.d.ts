@@ -1,6 +1,6 @@
-// next-navigation.d.ts
+import 'next/navigation';
+
 declare module 'next/navigation' {
-  // Vous pouvez réexporter les autres types si besoin,
-  // ici nous ajoutons uniquement la déclaration manquante pour redirect.
+  // Ajoute uniquement la déclaration de redirect s'il manque
   export function redirect(url: string): never;
 }
